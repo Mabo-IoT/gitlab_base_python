@@ -1,0 +1,27 @@
+stages:
+    - build
+    - deploy
+variables:
+    VERSION: 3.7-alpine
+    
+before_script: 
+    # - docker info
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+build:
+    stage: build
+    script:
+        - docker load -i python
+        - docker tag base_python:latest $CI_REGISTRY_IMAGE:latest
+        - docker tag base_python:$VERSION $CI_REGISTRY_IMAGE:$VERSION
+        - docker images
+        - docker push $CI_REGISTRY_IMAGE:$VERSION 
+        - docker push $CI_REGISTRY_IMAGE:latest
+        - docker rmi $CI_REGISTRY_IMAGE:$VERSION $CI_REGISTRY_IMAGE:latest base_python:latest
+        
+deploy:
+    stage: deploy
+    script: 
+        - curl -k -X POST -F token=c61868ed2626af2ecb857313309ef3 -F ref=master $CI_API_V4_URL/projects/6/trigger/pipeline
+    # trigger:
+        # project: mabo/doctopus
+        # branch: master
