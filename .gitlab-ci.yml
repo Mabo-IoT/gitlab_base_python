@@ -2,26 +2,43 @@ stages:
     - build
     - deploy
 variables:
-    VERSION: 3.7-alpine
+    VERSION: 3.7-alpine3.11
+    VERSION_slim: 3.7-slim
+    
     
 before_script: 
-    # - docker info
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+after_script:
+    - docker system prune -f
+
 build:
     stage: build
+    tags :
+        - 117_runner
     script:
         - docker load -i python
         - docker tag base_python:latest $CI_REGISTRY_IMAGE:latest
         - docker tag base_python:$VERSION $CI_REGISTRY_IMAGE:$VERSION
+        - docker tag base_python_docker:$VERSION $CI_REGISTRY_IMAGE/docker:$VERSION
+        - docker tag base_python_docker:$VERSION $CI_REGISTRY_IMAGE/docker:latest
+        - docker tag base_python_video:$VERSION_slim $CI_REGISTRY_IMAGE/video:$VERSION_slim
+        - docker tag base_python_video:$VERSION_slim $CI_REGISTRY_IMAGE/video:latest
         - docker images
         - docker push $CI_REGISTRY_IMAGE:$VERSION 
         - docker push $CI_REGISTRY_IMAGE:latest
-        - docker rmi $CI_REGISTRY_IMAGE:$VERSION $CI_REGISTRY_IMAGE:latest base_python:latest
+        - docker push $CI_REGISTRY_IMAGE/docker:$VERSION 
+        - docker push $CI_REGISTRY_IMAGE/docker:latest
+        - docker push $CI_REGISTRY_IMAGE/video:$VERSION_slim 
+        - docker push $CI_REGISTRY_IMAGE/video:latest
         
 deploy:
     stage: deploy
+    image: $CI_REGISTRY/mabo_group/base_application/base_python/docker:latest
+    tags :
+        - 117_runner
+    variables:
+        NEXT_TRIGGER_PROJECT: mabo_group/base_application/doctopus
+        GIT_STRATEGY: none
     script: 
-        - curl -k -X POST -F token=c61868ed2626af2ecb857313309ef3 -F ref=master $CI_API_V4_URL/projects/6/trigger/pipeline
-    # trigger:
-        # project: mabo/doctopus
-        # branch: master
+        - source <(curl -sk $CI_INTERFACE_ADDRESS/raw/master/trigger/trigger_project_ci.sh)
+    

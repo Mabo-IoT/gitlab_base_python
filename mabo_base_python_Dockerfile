@@ -1,12 +1,21 @@
-FROM python:latest
-RUN apk add --no-cache tzdata
+ARG image_tag
+FROM python:${image_tag}
 ENV TZ Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 WORKDIR /usr/mabo/
-COPY ./mabopython_requirements.txt ./ 
-COPY ./simplecannet-0.0.1-py3-none-any.whl ./ 
-RUN apk add --no-cache --virtual .build-deps gcc musl-dev curl \
-    && pip install --no-cache-dir -r mabopython_requirements.txt \
+COPY ./mabopython_requirements.txt ./simplecannet-0.0.1-py3-none-any.whl ./ 
+RUN  echo http://mirrors.ustc.edu.cn/alpine/v3.11/main > /etc/apk/repositories; \
+    echo http://mirrors.ustc.edu.cn/alpine/v3.11/community >> /etc/apk/repositories \
+    && apk add --no-cache tzdata curl bash \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
+    # add tmp package, after end of install,remove those package
+    && apk add --no-cache --virtual .build-deps gcc musl-dev openssl-dev libffi libffi-dev make build-base \
+    # 增加个别名，但这里要改为sh，参考：https://stackoverflow.com/questions/36388465/how-to-set-bash-aliases-for-docker-containers-in-dockerfile
+    && echo -e '#!/bin/sh\npip install -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com --no-cache-dir "$@"' > /usr/bin/pip_install_proxy && chmod +x /usr/bin/pip_install_proxy \
+    && pip_install_proxy --upgrade pip \
+    # 20-03-04 zhy:twisted包依赖的incremental，需要先进行升级
+    && pip_install_proxy --upgrade incremental \
+    && pip_install_proxy -r mabopython_requirements.txt \
     && pip install --no-cache-dir simplecannet-0.0.1-py3-none-any.whl \
     && rm mabopython_requirements.txt \
-    && rm simplecannet-0.0.1-py3-none-any.whl
+    && rm simplecannet-0.0.1-py3-none-any.whl 
+#    && apk del .build-deps

@@ -1,0 +1,19 @@
+stages:
+    - build
+    - test
+    - deploy
+variables:
+    
+    VERSION: 1.6.0
+    
+before_script: 
+    - docker info
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+build:
+    stage: build
+    script:
+        - docker build --rm -t $CI_REGISTRY_IMAGE:latest -f mabo_base_python_Dockerfile .
+        - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION
+        - docker push $CI_REGISTRY_IMAGE:latest
+        - docker push $CI_REGISTRY_IMAGE:$VERSION
+        

@@ -1,10 +1,12 @@
+urllib3==1.24.1   ## latest urllib3 can't compatiable to requests
 zope.interface
 constantly
-incremental
 attrs
 Automat
 twisted
 pymodbus
+# https://github.com/sdispater/pendulum/issues/457,这里限制2.0.5版本，修复后可以放开
+# 2021-04-02 zhy: 放是放开了,然而神秘的是2.0.5就成功不了. 诡吊
 pendulum
 redis
 influxdb
@@ -26,3 +28,12 @@ python-gitlab
 openpyxl
 xlsxwriter
 xlrd
+firebirdsql
+pyyaml
+kafka-python
+hjson
+paho-mqtt
+pymongo
+flask
+Flask-RESTful
+Flask-Docs

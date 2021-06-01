@@ -1,0 +1,11 @@
+FROM $CI_REGISTRY/python/alpine:latest
+RUN apk add --no-cache tzdata
+ENV TZ Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+WORKDIR /usr/mabo/
+COPY ./package ./ 
+COPY ./simplecannet-0.0.1-py3-none-any.whl ./ 
+RUN pip install --no-cache-dir --no-index ./package \
+    && pip install --no-cache-dir simplecannet-0.0.1-py3-none-any.whl \
+    && rm -rf ./package \
+    && rm simplecannet-0.0.1-py3-none-any.whl
