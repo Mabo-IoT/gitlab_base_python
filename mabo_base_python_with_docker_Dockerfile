@@ -1,0 +1,10 @@
+ARG image_tag
+FROM base_python:${image_tag}
+RUN apk add --no-cache docker git ffmpeg \
+    && git config --global http.sslVerify false \
+#    && apk add --no-cache --virtual .build-deps gcc musl-dev \
+    && apk add --no-cache openssl-dev build-base libressl-dev musl-dev libffi-dev openssh-client expect wkhtmltopdf \
+    # https://github.com/pyca/cryptography/issues/5771 
+    && pip_install_proxy pycrypto cffi cryptography==3.3.1 Markdown httplib2 docker \
+    && pip_install_proxy fabric 
+#    && apk del .build-deps

@@ -58,5 +58,20 @@ docker build -f mabopython_Dockerfile -t mabo/python:3.7.0-stretch .
 
 
 
+# 更新记录
 
+#### 20-03-04 zhy:
 
+- 增加关于video的处理的python镜像。
+
+- 解决某些包（twisted）需要先升级另外一些包（incremental）才能安装的问题。
+
+- 添加某些包(pendulum)需要的apt库。
+
+- 把pip一长串，使用pip_install_proxy代替，增加可读性。
+
+- opencv还不能直接装啊，不能转到alpine上，只能装到slim上啊。好吧
+
+  > https://github.com/skvark/opencv-python/issues/75#issuecomment-388571221
+
+<!--每次重新构建镜像，感觉都是玄学式更新，艹-->

@@ -1,0 +1,5 @@
+ARG image_tag
+FROM base_python:${image_tag}
+RUN apt install -y ffmpeg tesseract-ocr-chi-sim \
+    && apt clean\
+    && pip_install_proxy numpy opencv-python scikit-learn tensorflow imageai pytesseract
